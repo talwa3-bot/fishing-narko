@@ -45,7 +45,7 @@ button{background:#bada55!important;color:#020202!important;border-radius:4px!im
 <button class="go" onclick="goNow()">🎣 ללכת לדוג עכשיו?</button>
 <div id="goRes"></div>
 <div class="card"><button onclick="geo()">📍 מצא ספוט קרוב אליי</button>
-<select id="sel" onchange="detail(SPOTS[this.value])"><option>בחר חוף…</option></select></div>
+<select id="sel" onchange="localStorage.setItem(LK+'spot',this.value);detail(SPOTS[this.value])"><option>בחר חוף…</option></select></div>
 <div class="card promo"><h2>NOW ON SALE</h2><div class="prods">
 <a href="https://fishingnarko.wixsite.com/fishingnarko/product-page/%D7%91%D7%99%D7%A8%D7%93-%D7%9C%D7%98%D7%A8%D7%95%D7%9C%D7%99%D7%A0%D7%92-%D7%A9%D7%9C-%D7%97%D7%91%D7%A8%D7%AA-%D7%91%D7%95%D7%9F" target="_blank"><img loading="lazy" src="https://static.wixstatic.com/media/769e96_5574d8339c5e4c9fb5ae7ad2c0e2977c~mv2.jpg/v1/fill/w_300,h_300,al_c,q_85/file.jpg" alt="">בירד לטרולינג של חברת בון<br><b>₪110.00</b></a>
 <a href="https://fishingnarko.wixsite.com/fishingnarko/product-page/%D7%93%D7%9E%D7%95%D7%99-%D7%A7%D7%99%D7%A0%D7%92%D7%93%D7%95%D7%9D-%D7%9C%D7%96%D7%A8%D7%96%D7%95%D7%A8-%D7%97%D7%95%D7%A4%D7%99-%D7%91%D7%99%D7%A0%D7%95%D7%A0%D7%99" target="_blank"><img loading="lazy" src="https://static.wixstatic.com/media/769e96_362ad795154b4c47a9d0688d41a19fc2~mv2.jpg/v1/fill/w_300,h_300,al_c,q_85/file.jpg" alt="">דמוי קינגדום לזרזור חופי בינוני<br><b>₪45.00</b></a>
@@ -72,7 +72,7 @@ const SPOTS=[
 ["אילת – חוף הדקל",29.55,34.96,"red"],["אילת – חוף דרומי",29.51,34.925,"red"]
 ].map(([n,la,lo,t],i)=>({n,la,lo,t,i}));
 const LV={b:"מתחיל",i:"בינוני",e:"מקצוען"},GR={spin:"🎯 ספינינג עם רולר",surf:"🏖️ סרפקאסטינג",simple:"🪝 חכה פשוטה בלי רולר",tele:"📏 חכה טלסקופית",lrf:"🪶 LRF קל",jig:"⚓ ג'יגינג"};
-let P=JSON.parse(localStorage.getItem("narkoProf")||"null");
+let P=JSON.parse((localStorage.getItem("narko_prof")||localStorage.getItem("narkoProf"))||"null");
 const sel=document.getElementById('sel');SPOTS.forEach(s=>sel.add(new Option(s.n,s.i)));
 const C="https://commons.wikimedia.org/wiki/Special:FilePath/";
 const FISH={"לברק":"Sealife,_Bray,_Ireland._(6985874908).jpg","דניס":"Sparus_aurata,_Alpes-Maritimes,_Provence-Alpes-Côte_d'Azur,_FR_imported_from_iNaturalist_photo_207799710.jpg","סרגוס":"Sargo_común_(Diplodus_sargus),_Madeira,_Portugal,_2019-05-31,_DD_29.jpg","מוסר ים":"Mormora.jpg","בורי":"Mugil_cephalus_Minorca.jpg","לוקוס":"Mero_(Epinephelus_marginatus),_Cabo_de_Palos,_España,_2022-07-15,_DD_34.jpg","גראפה":"Pomatomus_saltatrix.png","אמנון":"Blue_Tilapia_(cropped).jpg","שפמנון":"Clarias_gariepinus.jpg","קרנגיים":"Jurel_de_aleta_azul_(Caranx_melampygus),_Yeda,_Arabia_Saudita,_2025-05-23,_DD_22.jpg","מוליות":"Mulloidichthys_vanicolensis,_Jemeluk_Wall,_Amed,_Bali,_Indonesia_imported_from_iNaturalist_photo_429994681.jpg","בלמידה":"Lichia_amia.jpg","ברקודה":"Sphyraena_viridensis_678403639.jpg","ברקודה גדולה":"Gran_barracuda_(Sphyraena_barracuda),_Yeda,_Arabia_Saudita,_2025-05-20,_DD_118.jpg","קרפיון":"Cyprinus_carpio_2008_G1_(cropped).jpg","פרידה":"Pargo_de_rayas_azules_(Lutjanus_kasmira),_Mauricio,_2025-09-23,_DD_37.jpg"};
@@ -118,15 +118,27 @@ function openProf(){const lv=P?.lv||"i",g=P?.g||"spin";document.getElementById('
  <div class="big" style="margin-top:12px">מה הרמה שלך?</div><div class="opts">${Object.entries(LV).map(([k,v])=>`<label><input type="radio" name="lv" value="${k}" ${k==lv?"checked":""}>${v}</label>`).join("")}</div>
  <div class="big" style="margin-top:12px">עם איזו חכה אתה דג?</div><div class="opts">${Object.entries(GR).map(([k,v])=>`<label><input type="radio" name="g" value="${k}" ${k==g?"checked":""}>${v}</label>`).join("")}</div>
  <button onclick="saveProf()" style="margin-top:14px">שמור ✔</button></div></div>`}
-function saveProf(){P={lv:document.querySelector('input[name=lv]:checked').value,g:document.querySelector('input[name=g]:checked').value};localStorage.setItem("narkoProf",JSON.stringify(P));document.getElementById('modal').innerHTML="";profTxt();if(DATA.length){rescore();rank();if(CUR)detail(CUR.s,true)}}
+function saveProf(){P={lv:document.querySelector('input[name=lv]:checked').value,g:document.querySelector('input[name=g]:checked').value};localStorage.setItem("narko_prof",JSON.stringify(P));document.getElementById('modal').innerHTML="";profTxt();if(DATA.length){rescore();rank();if(CUR)detail(CUR.s,true)}}
 function rank(){const ok=DATA.map(r=>{const k=nowIdx(r.H),n=r.H.slice(k,k+6);return{...r,k,now:Math.round(n.reduce((a,h)=>a+h.score,0)/n.length)}}).sort((a,b)=>b.now-a.now);
  document.getElementById('rank').innerHTML=ok.map((r,i)=>{const h=r.H[r.k];return`<div class="spot" onclick="detail(SPOTS[${r.s.i}])"><div class="s ${cls(r.now)}">${r.now}</div><div class="n"><b>${["🥇","🥈","🥉"][i]||"🎣"} ${r.s.n}</b><div class="m">🌊 ${h.wave.toFixed(1)}מ' · 💨 ${Math.round(h.ws)} קמ"ש</div></div><div>‹</div></div>`}).join("")+"<small>הקישו על ספוט לניתוח מלא</small>";return ok}
 function chart(hrs){const W=360,H=150,bw=W/hrs.length;return`<svg viewBox="0 0 ${W} ${H+22}" width="100%">${[25,50,75].map(y=>`<line x1="0" x2="${W}" y1="${H-y/100*H}" y2="${H-y/100*H}" stroke="#ffffff22"/>`).join("")}${hrs.map((x,i)=>`<rect x="${i*bw+1}" y="${H-x.score/100*H}" width="${bw-2}" height="${x.score/100*H}" rx="2" fill="${x.score>=70?"#5f5":x.score>=45?"#fd4":"#f66"}"/>`).join("")}${hrs.map((x,i)=>i%4==0?`<text x="${i*bw+bw/2}" y="${H+16}" fill="#cde" font-size="11" text-anchor="middle">${fmt(x.t)}</text>`:"").join("")}</svg>`}
+const LK="narko_";
+const km=(a,b)=>{const R=6371,t=Math.PI/180,dl=(b.la-a.la)*t,dn=(b.lo-a.lo)*t,x=Math.sin(dl/2)**2+Math.cos(a.la*t)*Math.cos(b.la*t)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
+let LIVE=null;try{LIVE=JSON.parse(localStorage.getItem(LK+"pos")||"null")}catch(e){}
+function setPos(c){LIVE={la:c.latitude,lo:c.longitude,t:Date.now()};localStorage.setItem(LK+"pos",JSON.stringify(LIVE))}
+const avg3=d=>{const k=nowIdx(d.H),n=d.H.slice(k,k+3);return Math.round(n.reduce((a,x)=>a+x.score,0)/n.length)};
+function showGo(d,dist,note){const r=document.getElementById('goRes'),k=nowIdx(d.H),h=d.H[k],sc=avg3(d),yes=sc>=60;
+ let alt="";if(LIVE){const L=DATA.filter(x=>x.s.i!=d.s.i).map(x=>({x,sc:avg3(x),km:km(LIVE,x.s)})),nb=L.filter(y=>y.km<=25).sort((a,b)=>b.sc-a.sc)[0],fr=[...L].sort((a,b)=>b.sc-a.sc||a.km-b.km)[0],far=nb&&nb.sc>=sc+10?nb:fr;
+  if(far&&far.sc>=sc+(far===nb?10:15))alt=`<div style="margin-top:8px">💡 חלופה: <a href="#" onclick="detail(SPOTS[${far.x.s.i}]);return false">${far.x.s.n}</a> – ${Math.round(far.km)} ק"מ ממך · ציון ${far.sc}</div>`}
+ r.innerHTML=`<div class="card"><div style="text-align:center;opacity:.8">ההמלצה שלנו</div><div class="verdict ${yes?"g":sc>=45?"y":"r"}">${yes?"✅ כן! לך לדוג":sc>=45?"🤔 אפשר, בזהירות":"❌ לא עכשיו"}</div><div style="text-align:center"><b>📍 ${d.s.n}</b>${dist!=null?` · ${dist<1?"פחות מק\"מ":Math.round(dist)+' ק"מ'} ממך`:""} · ציון ${sc}/100</div>${note?`<div style="text-align:center"><small>${note}</small></div>`:""}<div style="margin-top:8px">${h.why.map(w=>"• "+w).join("<br>")}</div>${alt}<button onclick="askWhere()" style="margin-top:10px;background:#ffffff22;color:inherit">📍 לא נכון? בחרו מיקום</button></div>`}
+function forPos(c,note){const ds=DATA.map(d=>({d,k:km(c,d.s)})).sort((a,b)=>a.k-b.k);showGo(ds[0].d,ds[0].k,note||"")}
+function askWhere(msg){const r=document.getElementById('goRes');r.innerHTML=`<div class="card"><div class="big">📍 איפה אתה?</div>${msg?`<small>${msg}</small>`:""}<select onchange="if(this.value!==''){localStorage.setItem(LK+'spot',this.value);const d=DATA.find(x=>x.s.i==this.value);showGo(d,LIVE?km(LIVE,d.s):null)}"><option value="">בחרו את החוף שלכם…</option>${SPOTS.map(s=>`<option value="${s.i}">${s.n}</option>`).join("")}</select><button onclick="goNow()">🔄 נסו שוב עם מיקום חי</button></div>`}
 function goNow(){const r=document.getElementById('goRes');if(!DATA.length){r.innerHTML='<div class="card">טוען…</div>';return}
- const show=d=>{const k=nowIdx(d.H),h=d.H[k],n=d.H.slice(k,k+3),sc=Math.round(n.reduce((a,x)=>a+x.score,0)/n.length),yes=sc>=60,best=rank()[0];
-  r.innerHTML=`<div class="card"><div style="text-align:center;opacity:.8">ההמלצה שלנו</div><div class="verdict ${yes?"g":sc>=45?"y":"r"}">${yes?"✅ כן! לך לדוג":sc>=45?"🤔 אפשר, בזהירות":"❌ לא עכשיו"}</div><div style="text-align:center"><b>${d.s.n}</b> · ציון ${sc}/100</div><div style="margin-top:8px">${h.why.map(w=>"• "+w).join("<br>")}</div>${!yes&&best.s.i!=d.s.i?`<div style="margin-top:8px">💡 הכי טוב עכשיו: <a href="#" onclick="detail(SPOTS[${best.s.i}]);return false">${best.s.n} (${best.now})</a></div>`:""}</div>`};
- if(CUR)return show(CUR);
- show(DATA.find(d=>d.s.i==rank()[0].s.i))}
+ if(LIVE&&Date.now()-LIVE.t<36e5)forPos(LIVE,"⏳ מעדכן מיקום חי…");else r.innerHTML='<div class="card" style="text-align:center">📡 מאתר את המיקום החי שלך…</div>';
+ const fail=()=>{const ls=localStorage.getItem(LK+"spot");if(ls!==null&&DATA.find(x=>x.s.i==ls))return showGo(DATA.find(x=>x.s.i==ls),null,"אין גישה למיקום – לפי החוף האחרון שבחרת");if(LIVE)return forPos(LIVE,"אין מיקום חי – לפי המיקום האחרון שנשמר");askWhere("לא הצלחנו לקבל מיקום. אפשרו גישה למיקום או בחרו חוף:")};
+ if(!navigator.geolocation)return fail();
+ navigator.geolocation.getCurrentPosition(p=>{setPos(p.coords);forPos(LIVE,"📡 לפי המיקום החי שלך");startWatch()},fail,{enableHighAccuracy:true,maximumAge:30000,timeout:12000})}
+let WID=null;function startWatch(){if(WID!==null||!navigator.geolocation)return;WID=navigator.geolocation.watchPosition(p=>{const moved=!LIVE||km(LIVE,{la:p.coords.latitude,lo:p.coords.longitude})>1;setPos(p.coords);if(moved&&document.querySelector('#goRes .verdict'))forPos(LIVE,"📡 לפי המיקום החי שלך")},()=>{},{enableHighAccuracy:true,maximumAge:60000})}
 const near=c=>[...DATA].sort((x,y)=>Math.hypot(x.s.la-c.latitude,x.s.lo-c.longitude)-Math.hypot(y.s.la-c.latitude,y.s.lo-c.longitude))[0];
 function setDay(i){DAY=i;detail(CUR.s,true)}
 function detail(s,keep){CUR=DATA.find(d=>d.s.i==s.i);if(!keep)DAY=0;const D=document.getElementById('det'),{H,sun}=CUR,k=nowIdx(H),h=H[k];
@@ -144,11 +156,11 @@ function detail(s,keep){CUR=DATA.find(d=>d.s.i==s.i);if(!keep)DAY=0;const D=docu
  <div class="card"><div class="big">🎣 ציוד מומלץ ודגים לפי סוג חכה</div>${g.n?g.n+"<br>":""}${g.o.map((o,i)=>`<div style="margin:12px 0;padding-top:8px;border-top:1px solid #fff2"><b>${o.r.startsWith(mine)?"⭐ מתאים לחכה שלך: ":""}${o.r}</b><br>🦐 פיתיון: ${o.b}<div class="fish" style="margin-top:8px">${o.f.map(fishImg).join("")}</div><a class="shopg" target="_blank" href="https://fishingnarko.wixsite.com/fishingnarko/duffle-bags">🎣 חכות</a> <a class="shopg" target="_blank" href="https://fishingnarko.wixsite.com/fishingnarko/backpacks">🌀 רולרים</a> <a class="shopg" target="_blank" href="https://fishingnarko.wixsite.com/fishingnarko/travel-packs">🪝 פיתיונות ונלווים</a></div>`).join("")}</div>
  <div class="card"><div class="big">🕐 שעה-שעה ‹ החליקו</div><div class="hrs">${dayH.filter((_,i)=>i%2==0).map(x=>`<div class="hr">${fmt(x.t)}<b class="${cls(x.score)}">${x.score}</b>🌊${x.wave.toFixed(1)}<br>💨${Math.round(x.ws)}</div>`).join("")}</div></div>`;
  if(!keep)D.scrollIntoView({behavior:'smooth'})}
-function geo(){navigator.geolocation.getCurrentPosition(p=>detail(near(p.coords).s),()=>alert("אין גישה למיקום"))}
+function geo(){navigator.geolocation.getCurrentPosition(p=>{setPos(p.coords);detail(near(p.coords).s)},()=>alert("אין גישה למיקום"))}
 let DP=null;const isSA=matchMedia('(display-mode: standalone)').matches||navigator.standalone,isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
 if(isSA)document.getElementById('instBtn').style.display="none";
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e});addEventListener('appinstalled',()=>document.getElementById('instBtn').style.display="none");
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./'});
 function pop(t){document.getElementById('modal').innerHTML=`<div class="modal" onclick="if(event.target==this)this.remove()"><div class="card">${t}<button onclick="document.getElementById('modal').innerHTML=''" style="margin-top:12px">הבנתי 👍</button></div></div>`}
 async function install(){if(DP){DP.prompt();const r=await DP.userChoice;DP=null;if(r.outcome=="accepted")document.getElementById('instBtn').style.display="none";return}
  if(isIOS)return pop(`<div class="big">📲 התקנה באייפון</div>1. פתחו את האתר ב-<b>Safari</b><br>2. לחצו על כפתור השיתוף ⬆️ בתחתית<br>3. גללו ובחרו <b>"הוסף למסך הבית"</b> ➕<br>4. לחצו <b>"הוסף"</b> – וזהו! 🎣`);
